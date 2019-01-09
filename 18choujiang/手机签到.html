@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>优翼年会 - 填写祝福赢大奖</title>
+<style>
+*{max-width: 550px;}
+body,html{width: 100%; height: 100%; overflow: hidden; padding: 0;margin: 0; font-family: "微软雅黑"; margin: auto;}
+img{border: 0; padding: 0; margin: 0;}
+.main{width: 100%; height: 100%; background-image: url(images/bbg.jpg);background-position: center; background-size: 100% 100%;}
+	.head{height: 50px; width: 100%; text-align: center; line-height: 50px; font-size: 25px; font-weight: 800; background-color: #E43B3B; color: #fff; border-radius: 0 0 10px 10px;}
+	.inpt_box{width: 300px; margin:20px auto 0 auto; text-align: center;}
+	.inpt_box span{display: block; font-size: 20px; color: #f85d73; font-weight: 800;}
+	.inpt_box input{width: 250px; text-align: center; background:rgba(255,255,255,0.5); border-radius: 10px 10px 2px 2px; border: none; border-bottom: 3px solid #f85d73; height: 30px; margin:5px 0 20px 0;font-weight: 800; font-size: 18px; color:rgba(0,0,0,0.3);outline:none;}
+	.inpt_box textarea{ width: 270px; height: 176px; padding: 10px 15px; outline:none;border: none; background: url(images/text-bg.png); font-size: 18px; color: #fff;font-weight: 800; font-family: "微软雅黑"; margin:5px 0; }
+	textarea::-webkit-input-placeholder {color: #ff7a8e;}
+	.inpt_box input.tj{height: 50px; border-radius: 4px; border: none; background:url(images/btn-bg.png);color: #ffecaa;}
+</style>
+</head>
+
+<body>
+<div class="main">
+	<div class="head">优翼年会幸运抽奖系统</div>
+	<div class="inpt_box">
+		<span>请输入姓名：</span>
+		<input type="text" maxlength="5">
+		<span>请输入手机号码(领奖唯一ID)：</span>
+		<input type="tel" maxlength="11">
+		<span>请填写你的祝福语：</span>
+		<textarea placeholder="祝福语字数少于80字！" maxlength="79"></textarea>
+		<input type="submit" class="tj">
+	</div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+		
+		/*微信、设备判断*/
+ 			function is_weixin() {
+				 var ua = window.navigator.userAgent.toLowerCase();
+				if (ua.match(/MicroMessenger/i) != 'micromessenger') {
+             		$("html,body").hide();
+					alert("请使用微信扫描！不支持其他浏览器，谢谢~");
+        		};
+				if(window.screen.width>550){
+					$("html,body").hide();
+					alert("请使用手机填写！谢谢~");
+				};
+            };
+            is_weixin();
+		/*调用缓存查看是否签订*/
+		var one = window.localStorage; 
+		if(one.getItem('qiandao')=='yes'){
+			$(".tj").attr("value","已签").css("background","#ccc").css("color","#888");
+		}else{
+        $(".tj").click(function () {
+            var userName = $("#userName").val();
+            var userPhone = $("#userPhone").val();
+            var remark = $("#remark").val();
+            if (userName == "" || userPhone == "" || remark == "") {
+                alert("信息填写不完整，提交失败");
+                return;
+            }
+            if (!(/^1(3|4|5|7|8)\d{9}$/.test(userPhone))) {
+                alert("手机号码有误，请重填");
+                return;
+            }
+            $.ajax({
+                url: '/choujiang/addUser.aspx?action=add',
+                type: 'POST',
+                data: {
+                    "userName": userName,
+                    "userPhone": userPhone,
+                    "remark": remark
+                },
+                timeout: 5000,    //超时时间
+                dataType: 'json',
+                success: function (result) {
+                    if (result.success == false) {
+                        alert(result.errorMessage);
+                    } else {
+                        alert("签到成功，幸运女神与您同在！");
+                		one.setItem('qiandao','yes');
+						location.reload();
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    console.log(XMLHttpRequest.status);
+                    console.log(XMLHttpRequest.readyState);
+                    console.log(textStatus);
+                    alert("服务器出错，请与管理员联系");
+                }
+
+            })
+        });
+		}
+    });
+</script>
+</body>
+</html>
